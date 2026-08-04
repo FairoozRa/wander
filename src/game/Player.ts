@@ -1,14 +1,13 @@
+import { GameObject } from './GameObject';
 import { Input } from './Input';
 
 const FRAME_SIZE = 32;
-const IDLE_FRAME_DURATION = 0.5;   // seconds per idle frame
-const WALK_FRAME_DURATION = 0.12;  // seconds per walk frame
+const IDLE_FRAME_DURATION = 0.5;
+const WALK_FRAME_DURATION = 0.12;
 
 type MovementState = 'IDLE' | 'WALKING';
 type Direction = 'DOWN' | 'RIGHT' | 'BACK' | 'LEFT';
 
-// Row index (0-based) within the sprite sheet for each direction's animations.
-// LEFT reuses RIGHT's rows — it's flipped at draw time instead of having its own row.
 const ROWS: Record<Direction, { idleRow: number; walkRow: number }> = {
   DOWN: { idleRow: 0, walkRow: 1 },
   RIGHT: { idleRow: 2, walkRow: 3 },
@@ -19,11 +18,7 @@ const ROWS: Record<Direction, { idleRow: number; walkRow: number }> = {
 const IDLE_FRAME_COUNT = 2;
 const WALK_FRAME_COUNT = 6;
 
-export class Player {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+export class Player extends GameObject {
   speed: number;
   private sprite: HTMLImageElement;
 
@@ -45,10 +40,7 @@ export class Player {
     canvasWidth: number,
     canvasHeight: number
   ) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+    super(x, y, width, height);
     this.speed = 200;
     this.sprite = sprite;
     this.canvasWidth = canvasWidth;
@@ -72,7 +64,6 @@ export class Player {
 
     this.clampToBounds();
 
-    // Priority order decides facing when multiple keys are held at once.
     let newDirection: Direction = this.direction;
     if (up) newDirection = 'BACK';
     else if (down) newDirection = 'DOWN';
@@ -81,8 +72,6 @@ export class Player {
 
     const newMovementState: MovementState = isMoving ? 'WALKING' : 'IDLE';
 
-    // Reset the animation when state or direction changes, so it never
-    // starts mid-cycle on the wrong frame.
     if (newDirection !== this.direction || newMovementState !== this.movementState) {
       this.frameIndex = 0;
       this.frameTimer = 0;
@@ -144,18 +133,10 @@ export class Player {
       ctx.save();
       ctx.translate(this.x + this.width, this.y);
       ctx.scale(-1, 1);
-      ctx.drawImage(
-        this.sprite,
-        sourceX, sourceY, FRAME_SIZE, FRAME_SIZE,
-        0, 0, this.width, this.height
-      );
+      ctx.drawImage(this.sprite, sourceX, sourceY, FRAME_SIZE, FRAME_SIZE, 0, 0, this.width, this.height);
       ctx.restore();
     } else {
-      ctx.drawImage(
-        this.sprite,
-        sourceX, sourceY, FRAME_SIZE, FRAME_SIZE,
-        this.x, this.y, this.width, this.height
-      );
+      ctx.drawImage(this.sprite, sourceX, sourceY, FRAME_SIZE, FRAME_SIZE, this.x, this.y, this.width, this.height);
     }
   }
 }

@@ -1,5 +1,8 @@
 import { Player } from './Player';
 import { Input } from './Input';
+import { TileMap } from './TileMap';
+import jungleMap from '../assets/maps/jungle.json';
+import tilesetSrc from '../assets/tiles/ground-tileset.png';
 
 export class Game {
   private ctx: CanvasRenderingContext2D;
@@ -9,6 +12,7 @@ export class Game {
   private input: Input;
   private player: Player | null = null;
   private sprite: HTMLImageElement;
+  private tileMap: TileMap;
 
   private lastTime: number = 0;
   private animationFrameId: number = 0;
@@ -32,6 +36,8 @@ export class Game {
 
     this.sprite = new Image();
     this.sprite.src = spriteSrc;
+
+    this.tileMap = new TileMap(jungleMap, tilesetSrc);
   }
 
   start() {
@@ -74,6 +80,8 @@ export class Game {
 
   private draw() {
     this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+    this.tileMap.draw(this.ctx);
 
     if (this.player) {
       this.player.draw(this.ctx);
